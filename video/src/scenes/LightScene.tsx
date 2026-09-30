@@ -1,81 +1,109 @@
 import React from "react";
-import { interpolate, useCurrentFrame, useVideoConfig } from "remotion";
-import { PALETTE, Street } from "../components/Street";
-import { FONT_SANS, INK, clamp, ease } from "../components/ui";
-import { PHOTOS } from "../data/photos";
-import { KeywordFrame } from "./KeywordFrame";
+import { AbsoluteFill, interpolate, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
+import { ACCENT, Beats, FONT_SANS, INK, WorkView, clamp, ease } from "../components/ui";
+import { SAMPLED, WORKS } from "../data/photos";
 
-// 从画面里“吸”出来的颜色：吸管位置（插画坐标，%）→ 右侧色卡
-const PICKS = [
-  { x: 30, y: 30, color: PALETTE.red, name: "橙红" },
-  { x: 43, y: 62, color: PALETTE.yellow, name: "明黄" },
-  { x: 66, y: 40, color: PALETTE.blue, name: "钴蓝" },
-  { x: 16, y: 72, color: PALETTE.black, name: "纯黑" },
+// 取色点（作品坐标 %），与 SAMPLED.leon 一一对应
+const PICK_AT = [
+  { x: 55, y: 30 },
+  { x: 4, y: 15 },
+  { x: 52, y: 78 },
+  { x: 80, y: 82 },
 ];
 
 /**
- * ① 热光：柔光 → 硬光。影子从淡灰变成纯黑的形状并“落”到位，颜色饱和度同步拉满；
- * 然后吸管从画面里取出四个颜色。
+ * ① 热光 —— León, Mexico, 1987
+ * 1.5s：从照片里提取出的“纯黑影子”被染成高亮色、再描出轮廓：影子本身就是画面的形状；
+ * 4.4s：影子退回原样，吸管从原作里取出四个颜色，色卡在 3D 里翻转落位；
+ * 最后 2 秒原作干净停留。
  */
 export const LightScene: React.FC = () => {
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  const hard = interpolate(frame, [0.6 * fps, 2.6 * fps], [0, 1], { ...clamp, easing: ease });
+  const { fps, height } = useVideoConfig();
+  const work = WORKS.leonBox;
+  const w = height * work.ratio;
+  const fillOn = interpolate(frame, [1.5 * fps, 2.2 * fps, 3.9 * fps, 4.5 * fps], [0, 0.72, 0.72, 0], { ...clamp, easing: ease });
+  const lineOn = interpolate(frame, [2 * fps, 2.6 * fps, 4.2 * fps, 4.6 * fps], [0, 1, 1, 0], clamp);
+  const hidden = interpolate(frame, [3 * fps, 3.4 * fps, 4.3 * fps, 4.6 * fps], [0, 1, 1, 0], clamp);
+  const chipsOut = interpolate(frame, [6.4 * fps, 6.8 * fps], [1, 0], clamp);
+  const maskUrl = `url(${staticFile("photos/fx/16-shadow-mask.png")})`;
+  const lineUrl = `url(${staticFile("photos/fx/16-shadow-outline.png")})`;
+  const maskStyle = (url: string): React.CSSProperties => ({
+    position: "absolute",
+    inset: 0,
+    WebkitMaskImage: url,
+    maskImage: url,
+    WebkitMaskSize: "100% 100%",
+    maskSize: "100% 100%",
+  });
 
   return (
-    <KeywordFrame id="light" photo={PHOTOS.light}>
-      <Street
-        style={{ filter: `saturate(${0.45 + hard * 0.75}) contrast(${0.85 + hard * 0.25})`, scale: 1.04 - hard * 0.04 }}
-        layers={{
-          shadow: {
-            opacity: 0.2 + hard * 0.8,
-            translate: `${(1 - hard) * 60}px ${(1 - hard) * -30}px`,
-            filter: `blur(${(1 - hard) * 14}px)`,
-          },
-        }}
-      />
-      {PICKS.map((p, i) => {
-        const at = (3 + i * 0.45) * fps;
-        const t = interpolate(frame, [at, at + 12], [0, 1], { ...clamp, easing: ease });
-        return (
-          <React.Fragment key={p.name}>
+    <AbsoluteFill>
+      <WorkView work={work} push={[1, 1.05]}>
+        <div style={{ ...maskStyle(maskUrl), background: ACCENT, opacity: fillOn, mixBlendMode: "screen" }} />
+        <div style={{ ...maskStyle(lineUrl), background: INK, opacity: lineOn }} />
+        {/* 影子里藏着的人 */}
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none" style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
+          <ellipse cx={46.5} cy={65.5} rx={5.2} ry={7.6} fill="none" stroke={INK} strokeWidth={6} opacity={hidden} vectorEffect="non-scaling-stroke" />
+        </svg>
+        <div style={{ position: "absolute", left: "52%", top: "70%", fontFamily: FONT_SANS, fontWeight: 700, fontSize: 38, color: INK, opacity: hidden, textShadow: "0 2px 12px rgba(0,0,0,0.8)" }}>
+          箱子里还藏着一个人
+        </div>
+        {/* 吸管取色点 */}
+        {SAMPLED.leon.map((c, i) => {
+          const at = (4.7 + i * 0.3) * fps;
+          const t = interpolate(frame, [at, at + 10], [0, 1], { ...clamp, easing: ease });
+          return (
             <div
+              key={c.name}
               style={{
                 position: "absolute",
-                left: `${p.x}%`,
-                top: `${p.y}%`,
-                width: 70,
-                height: 70,
-                marginLeft: -35,
-                marginTop: -35,
-                borderRadius: 35,
+                left: `${PICK_AT[i].x}%`,
+                top: `${PICK_AT[i].y}%`,
+                width: 56,
+                height: 56,
+                marginLeft: -28,
+                marginTop: -28,
+                borderRadius: 28,
                 border: `5px solid ${INK}`,
-                background: p.color,
-                opacity: t,
-                scale: 0.4 + t * 0.6,
-                boxShadow: "0 6px 20px rgba(0,0,0,0.5)",
+                background: c.color,
+                opacity: t * chipsOut,
+                scale: 0.3 + t * 0.7,
+                boxShadow: "0 6px 20px rgba(0,0,0,0.6)",
               }}
             />
+          );
+        })}
+      </WorkView>
+      {/* 右侧色卡：在 3D 里翻转落位 */}
+      <AbsoluteFill style={{ perspective: 1200, pointerEvents: "none" }}>
+        {SAMPLED.leon.map((c, i) => {
+          const at = (4.9 + i * 0.3) * fps;
+          const t = interpolate(frame, [at, at + 14], [0, 1], { ...clamp, easing: ease });
+          return (
             <div
+              key={c.name}
               style={{
                 position: "absolute",
-                right: 110,
-                top: 250 + i * 150,
+                left: (1920 - w) / 2 + w - 250,
+                top: 300 + i * 150,
                 display: "flex",
                 alignItems: "center",
-                gap: 20,
-                opacity: t,
-                translate: `${(1 - t) * 60}px 0px`,
+                gap: 18,
+                opacity: t * chipsOut,
+                transform: `rotateY(${(1 - t) * 90}deg)`,
+                transformOrigin: "right center",
               }}
             >
-              <span style={{ fontFamily: FONT_SANS, fontWeight: 700, fontSize: 36, color: INK, textShadow: "0 2px 12px rgba(0,0,0,0.7)" }}>
-                {p.name}
+              <span style={{ fontFamily: FONT_SANS, fontWeight: 700, fontSize: 30, color: INK, textShadow: "0 2px 10px rgba(0,0,0,0.9)", width: 120, textAlign: "right" }}>
+                {c.name}
               </span>
-              <div style={{ width: 110, height: 110, background: p.color, border: `4px solid ${INK}`, borderRadius: 8 }} />
+              <div style={{ width: 100, height: 100, background: c.color, border: `4px solid ${INK}`, borderRadius: 6, boxShadow: "0 10px 30px rgba(0,0,0,0.5)" }} />
             </div>
-          </React.Fragment>
-        );
-      })}
-    </KeywordFrame>
+          );
+        })}
+      </AbsoluteFill>
+      <Beats id="light" />
+    </AbsoluteFill>
   );
 };

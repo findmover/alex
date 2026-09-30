@@ -9,6 +9,7 @@ import { LightScene } from "./scenes/LightScene";
 import { LayersScene } from "./scenes/LayersScene";
 import { EdgesScene } from "./scenes/EdgesScene";
 import { PayoffScene } from "./scenes/PayoffScene";
+import { GalleryScene } from "./scenes/GalleryScene";
 import { OutroScene } from "./scenes/OutroScene";
 
 /**
@@ -41,7 +42,10 @@ export const AlexWebbVideo: React.FC = () => (
     <Series.Sequence name="6 回扣 99%" durationInFrames={sceneFrames("payoff")}>
       <PayoffScene />
     </Series.Sequence>
-    <Series.Sequence name="7 结尾" durationInFrames={sceneFrames("outro")}>
+    <Series.Sequence name="7 他等到的 1%" durationInFrames={sceneFrames("gallery")}>
+      <GalleryScene />
+    </Series.Sequence>
+    <Series.Sequence name="8 结尾" durationInFrames={sceneFrames("outro")}>
       <OutroScene />
     </Series.Sequence>
   </Series>

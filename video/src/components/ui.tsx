@@ -10,7 +10,7 @@ import {
   useVideoConfig,
 } from "remotion";
 import { Beat, SceneId, getScene } from "../data/script";
-import { PhotoSlot } from "../data/photos";
+import { CREDIT, Work } from "../data/photos";
 import { PALETTE } from "./Street";
 
 // 字体已按需子集化存在 public/fonts/（npm run fonts 重新生成），渲染时不联网
@@ -138,6 +138,9 @@ export const Beats: React.FC<{
             {scrim && pos === "bottom" ? (
               <AbsoluteFill style={{ background: "linear-gradient(0deg, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0) 42%)" }} />
             ) : null}
+            {scrim && pos === "top" ? (
+              <AbsoluteFill style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 34%)" }} />
+            ) : null}
             {scrim && pos === "left" ? (
               <AbsoluteFill style={{ background: "linear-gradient(90deg, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0) 55%)" }} />
             ) : null}
@@ -156,29 +159,76 @@ export const Beats: React.FC<{
   );
 };
 
-/** 原作：不调色、不加滤镜，只做缓慢推近；右下角标注作品名与版权 */
-export const Photo: React.FC<{ photo: PhotoSlot; push?: [number, number]; style?: React.CSSProperties }> = ({
-  photo,
-  push = [1, 1.05],
-  style,
-}) => {
+/**
+ * 原作全屏展示：按原比例完整显示（不裁切），两侧留深黑；只做缓慢推近；右下角标注地点年份与版权。
+ */
+export const WorkView: React.FC<{
+  work: Work;
+  push?: [number, number];
+  caption?: boolean;
+  style?: React.CSSProperties;
+  imgStyle?: React.CSSProperties;
+  children?: React.ReactNode;
+}> = ({ work, push = [1, 1.04], caption = true, style, imgStyle, children }) => {
   const frame = useCurrentFrame();
-  const { durationInFrames } = useVideoConfig();
-  if (!photo.src) return null;
+  const { durationInFrames, width, height } = useVideoConfig();
+  const w = Math.min(width, height * work.ratio);
+  const h = w / work.ratio;
   return (
-    <AbsoluteFill style={{ backgroundColor: NIGHT, ...style }}>
-      <Img
-        src={staticFile(photo.src)}
+    <AbsoluteFill style={{ backgroundColor: NIGHT, justifyContent: "center", alignItems: "center", ...style }}>
+      <div
         style={{
-          width: "100%",
-          height: "100%",
-          objectFit: "contain",
+          position: "relative",
+          width: w,
+          height: h,
           scale: interpolate(frame, [0, durationInFrames], push, clamp),
         }}
-      />
-      <div style={{ position: "absolute", right: 36, bottom: 22, fontFamily: FONT_SANS, fontSize: 22, color: INK, opacity: 0.75 }}>
-        {[photo.caption, photo.credit].filter(Boolean).join("  ·  ")}
+      >
+        <Img src={staticFile(work.file)} style={{ width: "100%", height: "100%", display: "block", ...imgStyle }} />
+        {children}
       </div>
+      {caption ? <Caption work={work} /> : null}
     </AbsoluteFill>
   );
 };
+
+export const Caption: React.FC<{ work: Work; opacity?: number }> = ({ work, opacity = 0.8 }) => (
+  <div
+    style={{
+      position: "absolute",
+      right: 32,
+      bottom: 20,
+      fontFamily: FONT_SANS,
+      fontSize: 22,
+      color: INK,
+      opacity,
+      textShadow: "0 1px 6px rgba(0,0,0,0.8)",
+    }}
+  >
+    {work.caption} · {CREDIT}
+  </div>
+);
+
+/** 3D 空间里的一张相片（白边卡纸 + 投影），宽度 w，按原比例 */
+export const PhotoCard: React.FC<{ work: Work; w: number; style?: React.CSSProperties; label?: boolean }> = ({
+  work,
+  w,
+  style,
+  label,
+}) => (
+  <div
+    style={{
+      position: "absolute",
+      width: w + 28,
+      padding: 14,
+      background: "#f2eee6",
+      boxShadow: "0 40px 80px rgba(0,0,0,0.55)",
+      ...style,
+    }}
+  >
+    <Img src={staticFile(work.file)} style={{ width: w, height: w / work.ratio, display: "block" }} />
+    {label ? (
+      <div style={{ fontFamily: FONT_SANS, fontSize: 18, color: "#3a342c", marginTop: 10, letterSpacing: 1 }}>{work.caption}</div>
+    ) : null}
+  </div>
+);

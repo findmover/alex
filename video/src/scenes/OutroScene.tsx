@@ -1,38 +1,40 @@
 import React from "react";
-import { AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig } from "remotion";
-import { Street } from "../components/Street";
+import { AbsoluteFill, Img, interpolate, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import { ACCENT, Beats, FONT_SANS, FONT_SERIF, INK, clamp, ease } from "../components/ui";
+import { CREDIT, WORKS } from "../data/photos";
 
 const STEPS = [
-  { n: "①", text: "看色块", layers: { mid: { opacity: 0 }, fg: { opacity: 0 } }, at: 1.0 },
-  { n: "②", text: "数层次", layers: { bg: { opacity: 0.25 }, shadow: { opacity: 0.25 } }, at: 1.9 },
-  { n: "③", text: "看边缘", layers: {}, at: 2.8, crop: true },
+  { n: "①", text: "看色块与影子", work: WORKS.leonBox, at: 0.6 },
+  { n: "②", text: "数一数层次", work: WORKS.tehuantepec, at: 1.2 },
+  { n: "③", text: "看画框边缘", work: WORKS.istanbulShip, at: 1.8 },
 ];
 
-/** 第七幕 · 结尾（8s）：三个看图方法 + 推荐书 + 版权说明 */
+/** 第八幕 · 结尾（6s）：三个看图方法（配三张作品）+ 推荐书 + 版权说明 */
 export const OutroScene: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   return (
     <AbsoluteFill style={{ backgroundColor: "#0b0a09" }}>
-      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", flexDirection: "row", gap: 60, paddingTop: 60 }}>
+      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", flexDirection: "row", gap: 56, paddingTop: 40, perspective: 1600 }}>
         {STEPS.map((s) => {
-          const t = interpolate(frame, [s.at * fps, s.at * fps + 14], [0, 1], { ...clamp, easing: ease });
+          const t = interpolate(frame, [s.at * fps, s.at * fps + 16], [0, 1], { ...clamp, easing: ease });
           return (
-            <div key={s.n} style={{ opacity: t, translate: `0px ${(1 - t) * 60}px`, display: "flex", flexDirection: "column", alignItems: "center", gap: 26 }}>
-              <div style={{ position: "relative", width: 480, height: 270, overflow: "hidden", borderRadius: 8 }}>
-                <div style={{ width: 1920, height: 1080, scale: 0.25, transformOrigin: "0 0" }}>
-                  <Street layers={s.layers} />
-                </div>
-                {s.crop ? (
-                  <svg viewBox="0 0 1920 1080" style={{ position: "absolute", inset: 0 }} width="100%" height="100%">
-                    <path fillRule="evenodd" fill="rgba(0,0,0,0.6)" d="M0 0H1920V1080H0Z M130 150h1640v860h-1640Z" />
-                    <rect x={130} y={150} width={1640} height={860} fill="none" stroke={ACCENT} strokeWidth={18} />
-                  </svg>
-                ) : null}
+            <div
+              key={s.n}
+              style={{
+                opacity: t,
+                transform: `translateY(${(1 - t) * 60}px) rotateX(${(1 - t) * 50}deg)`,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 24,
+              }}
+            >
+              <div style={{ padding: 10, background: "#efebe3" }}>
+                <Img src={staticFile(s.work.file)} style={{ width: 480, height: 480 / s.work.ratio, display: "block" }} />
               </div>
-              <div style={{ fontFamily: FONT_SERIF, fontWeight: 700, fontSize: 64, color: INK }}>
-                <span style={{ color: ACCENT, marginRight: 14 }}>{s.n}</span>
+              <div style={{ fontFamily: FONT_SERIF, fontWeight: 700, fontSize: 56, color: INK }}>
+                <span style={{ color: ACCENT, marginRight: 12 }}>{s.n}</span>
                 {s.text}
               </div>
             </div>
@@ -50,10 +52,10 @@ export const OutroScene: React.FC = () => {
           fontFamily: FONT_SANS,
           fontSize: 22,
           color: INK,
-          opacity: interpolate(frame, [5 * fps, 5.6 * fps], [0, 0.6], clamp),
+          opacity: interpolate(frame, [3 * fps, 3.6 * fps], [0, 0.6], clamp),
         }}
       >
-        片中插画为原创示意图 · 摄影作品版权归 Alex Webb / Magnum Photos 所有
+        摄影作品 {CREDIT} · 片中插画为原创示意图
       </div>
     </AbsoluteFill>
   );

@@ -10,6 +10,7 @@ import { LightScene } from "./scenes/LightScene";
 import { LayersScene } from "./scenes/LayersScene";
 import { EdgesScene } from "./scenes/EdgesScene";
 import { PayoffScene } from "./scenes/PayoffScene";
+import { GalleryScene } from "./scenes/GalleryScene";
 import { OutroScene } from "./scenes/OutroScene";
 
 export const RemotionRoot: React.FC = () => (
@@ -24,7 +25,8 @@ export const RemotionRoot: React.FC = () => (
       <Composition id="S5b-Layers" component={LayersScene} durationInFrames={sceneFrames("layers")} fps={FPS} width={WIDTH} height={HEIGHT} />
       <Composition id="S5c-Edges" component={EdgesScene} durationInFrames={sceneFrames("edges")} fps={FPS} width={WIDTH} height={HEIGHT} />
       <Composition id="S6-Payoff" component={PayoffScene} durationInFrames={sceneFrames("payoff")} fps={FPS} width={WIDTH} height={HEIGHT} />
-      <Composition id="S7-Outro" component={OutroScene} durationInFrames={sceneFrames("outro")} fps={FPS} width={WIDTH} height={HEIGHT} />
+      <Composition id="S7-Gallery" component={GalleryScene} durationInFrames={sceneFrames("gallery")} fps={FPS} width={WIDTH} height={HEIGHT} />
+      <Composition id="S8-Outro" component={OutroScene} durationInFrames={sceneFrames("outro")} fps={FPS} width={WIDTH} height={HEIGHT} />
     </Folder>
   </>
 );
