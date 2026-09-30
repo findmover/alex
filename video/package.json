@@ -7,7 +7,7 @@
   "private": true,
   "dependencies": {
     "@remotion/cli": "4.0.530",
-    "@remotion/google-fonts": "4.0.530",
+    "@remotion/fonts": "4.0.530",
     "@remotion/media": "4.0.530",
     "@remotion/tailwind-v4": "4.0.530",
     "@remotion/transitions": "4.0.530",
@@ -28,7 +28,8 @@
     "dev": "remotion studio",
     "build": "remotion bundle",
     "upgrade": "remotion upgrade",
-    "lint": "eslint src && tsc"
+    "lint": "eslint src && tsc",
+    "fonts": "node scripts/fetch-fonts.mjs"
   },
   "sideEffects": [
     "*.css"

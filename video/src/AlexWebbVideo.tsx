@@ -1,69 +1,48 @@
 import React from "react";
-import { linearTiming, TransitionSeries } from "@remotion/transitions";
-import { fade } from "@remotion/transitions/fade";
-import { TRANSITION_FRAMES, getScene, sceneFrames } from "./data/script";
+import { Series } from "remotion";
+import { sceneFrames } from "./data/script";
 import { HookScene } from "./scenes/HookScene";
-import { TitleScene } from "./scenes/TitleScene";
-import { WhoScene } from "./scenes/WhoScene";
+import { SouthScene } from "./scenes/SouthScene";
+import { HaitiScene } from "./scenes/HaitiScene";
+import { ColorScene } from "./scenes/ColorScene";
 import { LightScene } from "./scenes/LightScene";
 import { LayersScene } from "./scenes/LayersScene";
-import { GridScene } from "./scenes/GridScene";
 import { EdgesScene } from "./scenes/EdgesScene";
-import { MethodScene } from "./scenes/MethodScene";
-import { HowToScene } from "./scenes/HowToScene";
+import { PayoffScene } from "./scenes/PayoffScene";
 import { OutroScene } from "./scenes/OutroScene";
 
-const Fade = () => (
-  <TransitionSeries.Transition
-    presentation={fade()}
-    timing={linearTiming({ durationInFrames: TRANSITION_FRAMES })}
-  />
-);
-
 /**
- * 完整成片。每幕时长来自 src/data/script.ts —— 改时长请改那里，
- * 这样字幕切分、总时长、审查文档会一起更新。
+ * 成片：抖音 16:9，约 80 秒，全部硬切（短视频节奏，不用淡入淡出）。
+ * 每幕时长来自 src/data/script.ts。
  */
 export const AlexWebbVideo: React.FC = () => (
-  <TransitionSeries>
-    <TransitionSeries.Sequence name="01 开场" durationInFrames={sceneFrames(getScene("hook"))}>
+  <Series>
+    <Series.Sequence name="1 钩子 99%" durationInFrames={sceneFrames("hook")}>
       <HookScene />
-    </TransitionSeries.Sequence>
-    <Fade />
-    <TransitionSeries.Sequence name="02 片名" durationInFrames={sceneFrames(getScene("title"))}>
-      <TitleScene />
-    </TransitionSeries.Sequence>
-    <Fade />
-    <TransitionSeries.Sequence name="03 他是谁" durationInFrames={sceneFrames(getScene("who"))}>
-      <WhoScene />
-    </TransitionSeries.Sequence>
-    <Fade />
-    <TransitionSeries.Sequence name="04 热光" durationInFrames={sceneFrames(getScene("light"))}>
+    </Series.Sequence>
+    <Series.Sequence name="2 困境 黑白" durationInFrames={sceneFrames("south")}>
+      <SouthScene />
+    </Series.Sequence>
+    <Series.Sequence name="3 转折 海地" durationInFrames={sceneFrames("haiti")}>
+      <HaitiScene />
+    </Series.Sequence>
+    <Series.Sequence name="4 发现颜色" durationInFrames={sceneFrames("color")}>
+      <ColorScene />
+    </Series.Sequence>
+    <Series.Sequence name="5a 热光" durationInFrames={sceneFrames("light")}>
       <LightScene />
-    </TransitionSeries.Sequence>
-    <Fade />
-    <TransitionSeries.Sequence name="05 层次" durationInFrames={sceneFrames(getScene("layers"))}>
+    </Series.Sequence>
+    <Series.Sequence name="5b 层次" durationInFrames={sceneFrames("layers")}>
       <LayersScene />
-    </TransitionSeries.Sequence>
-    <Fade />
-    <TransitionSeries.Sequence name="06 分割" durationInFrames={sceneFrames(getScene("grid"))}>
-      <GridScene />
-    </TransitionSeries.Sequence>
-    <Fade />
-    <TransitionSeries.Sequence name="07 边缘" durationInFrames={sceneFrames(getScene("edges"))}>
+    </Series.Sequence>
+    <Series.Sequence name="5c 边缘" durationInFrames={sceneFrames("edges")}>
       <EdgesScene />
-    </TransitionSeries.Sequence>
-    <Fade />
-    <TransitionSeries.Sequence name="08 行走与等待" durationInFrames={sceneFrames(getScene("method"))}>
-      <MethodScene />
-    </TransitionSeries.Sequence>
-    <Fade />
-    <TransitionSeries.Sequence name="09 三步看图" durationInFrames={sceneFrames(getScene("howto"))}>
-      <HowToScene />
-    </TransitionSeries.Sequence>
-    <Fade />
-    <TransitionSeries.Sequence name="10 结尾" durationInFrames={sceneFrames(getScene("outro"))}>
+    </Series.Sequence>
+    <Series.Sequence name="6 回扣 99%" durationInFrames={sceneFrames("payoff")}>
+      <PayoffScene />
+    </Series.Sequence>
+    <Series.Sequence name="7 结尾" durationInFrames={sceneFrames("outro")}>
       <OutroScene />
-    </TransitionSeries.Sequence>
-  </TransitionSeries>
+    </Series.Sequence>
+  </Series>
 );

@@ -1,47 +1,32 @@
 import React from "react";
 import { AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig } from "remotion";
+import { ContactSheet } from "../components/ContactSheet";
+import { Beats, Photo, clamp, ease } from "../components/ui";
 import { PHOTOS } from "../data/photos";
-import { PhotoOrIllustration, clamp, ease } from "../components/ui";
-import { SceneShell } from "./SceneShell";
 
-/** 开场：插画逐层出现 —— 先是颜色和影子，再是一个个人物 */
+/**
+ * 第一幕 · 钩子（8s）
+ * 第 0 帧就是满屏彩色印样 + 大字引语；格子一格格变灰；
+ * 只剩一格亮着 → 推进占满全屏 → 剩下的 1%。
+ */
 export const HookScene: React.FC = () => {
   const frame = useCurrentFrame();
-  const { fps, durationInFrames } = useVideoConfig();
+  const { fps } = useVideoConfig();
+  const fail = interpolate(frame, [0.3 * fps, 4.2 * fps], [0, 1], clamp);
+  const zoom = interpolate(frame, [4.5 * fps, 5.4 * fps], [0, 1], { ...clamp, easing: ease });
+  const dim = interpolate(frame, [4.4 * fps, 5 * fps], [0.32, 0], clamp);
+  const photoIn = interpolate(frame, [5.3 * fps, 5.6 * fps], [0, 1], clamp);
 
   return (
-    <SceneShell id="hook">
-      <PhotoOrIllustration
-        photo={PHOTOS.hook}
-        style={{
-          scale: interpolate(frame, [0, durationInFrames], [1.08, 1], {
-            ...clamp,
-            output: "perceptual-scale",
-          }),
-        }}
-        layers={{
-          bg: { opacity: interpolate(frame, [0, 1 * fps], [0, 1], { ...clamp, easing: ease }) },
-          shadow: {
-            opacity: interpolate(frame, [1 * fps, 2.5 * fps], [0, 1], { ...clamp, easing: ease }),
-          },
-          fg: {
-            opacity: interpolate(frame, [7.5 * fps, 8.3 * fps], [0, 1], { ...clamp, easing: ease }),
-            translate: interpolate(frame, [7.5 * fps, 8.3 * fps], ["-80px 0px", "0px 0px"], {
-              ...clamp,
-              easing: ease,
-            }),
-          },
-          mid: {
-            opacity: interpolate(frame, [9 * fps, 10 * fps], [0, 1], { ...clamp, easing: ease }),
-          },
-        }}
-      />
-      {/* 开场暗角 */}
-      <AbsoluteFill
-        style={{
-          background: "radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.55) 100%)",
-        }}
-      />
-    </SceneShell>
+    <AbsoluteFill>
+      <ContactSheet fail={fail} circle={0} zoom={zoom} />
+      {PHOTOS.reveal.src ? (
+        <AbsoluteFill style={{ opacity: photoIn }}>
+          <Photo photo={PHOTOS.reveal} />
+        </AbsoluteFill>
+      ) : null}
+      <AbsoluteFill style={{ backgroundColor: `rgba(0,0,0,${dim})` }} />
+      <Beats id="hook" instantFirst />
+    </AbsoluteFill>
   );
 };

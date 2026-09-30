@@ -1,29 +1,21 @@
 /**
- * 真实作品图位（photo slots）。
- *
- * Alex Webb 的作品版权归 Alex Webb / Magnum Photos 所有，仓库里不附带任何原作。
- * 默认每个图位都显示自绘的「韦伯风格示意插画」。
- * 取得授权（或确认符合合理使用）后：
- *   1. 把图片放到 video/public/photos/ 下（该目录已被 .gitignore 忽略，不会提交）
- *   2. 把下面对应的 src 从 null 改成 "photos/文件名.jpg"
- * 视频就会在这一幕改用原作，并在右下角显示 credit。
+ * 原作图位。图片放在 video/public/photos/，把 src 从 null 改成 "photos/文件名.jpg"。
+ * 规则：原作不调色、不加滤镜，只做缓慢推近与标注；没有原作时显示自绘示意图。
  */
 
 export type PhotoSlot = {
   src: string | null;
-  /** 图片说明，例如 "Tehuantepec, Mexico, 1985" */
+  /** 作品名与年份，例如 "Grenada, 1979" */
   caption: string;
   credit: string;
 };
 
-export const PHOTOS: Record<
-  "hook" | "who" | "light" | "layers" | "grid" | "edges",
-  PhotoSlot
-> = {
-  hook: { src: null, caption: "", credit: "© Alex Webb / Magnum Photos" },
-  who: { src: null, caption: "", credit: "© Alex Webb / Magnum Photos" },
-  light: { src: null, caption: "", credit: "© Alex Webb / Magnum Photos" },
-  layers: { src: null, caption: "", credit: "© Alex Webb / Magnum Photos" },
-  grid: { src: null, caption: "", credit: "© Alex Webb / Magnum Photos" },
-  edges: { src: null, caption: "", credit: "© Alex Webb / Magnum Photos" },
+const CREDIT = "© Alex Webb / Magnum Photos";
+
+export const PHOTOS = {
+  /** 开场 1% 揭晓 + 第四幕变彩色后完整出现 */
+  reveal: { src: null, caption: "", credit: CREDIT } as PhotoSlot,
+  light: { src: null, caption: "", credit: CREDIT } as PhotoSlot,
+  layers: { src: null, caption: "", credit: CREDIT } as PhotoSlot,
+  edges: { src: null, caption: "", credit: CREDIT } as PhotoSlot,
 };

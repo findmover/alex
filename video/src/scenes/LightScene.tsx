@@ -1,95 +1,81 @@
 import React from "react";
-import { AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig } from "remotion";
+import { interpolate, useCurrentFrame, useVideoConfig } from "remotion";
+import { PALETTE, Street } from "../components/Street";
+import { FONT_SANS, INK, clamp, ease } from "../components/ui";
 import { PHOTOS } from "../data/photos";
-import { PALETTE } from "../components/WebbIllustration";
-import { FONT_SANS, INK, KeywordTag, PhotoOrIllustration, clamp, ease } from "../components/ui";
-import { SceneShell } from "./SceneShell";
+import { KeywordFrame } from "./KeywordFrame";
 
-const SWATCHES = [
-  { color: PALETTE.red, name: "红" },
-  { color: PALETTE.yellow, name: "黄" },
-  { color: PALETTE.blue, name: "蓝" },
-  { color: PALETTE.black, name: "黑" },
+// 从画面里“吸”出来的颜色：吸管位置（插画坐标，%）→ 右侧色卡
+const PICKS = [
+  { x: 30, y: 30, color: PALETTE.red, name: "橙红" },
+  { x: 43, y: 62, color: PALETTE.yellow, name: "明黄" },
+  { x: 66, y: 40, color: PALETTE.blue, name: "钴蓝" },
+  { x: 16, y: 72, color: PALETTE.black, name: "纯黑" },
 ];
 
-/** 关键词一：热光 —— 从柔光低饱和过渡到硬光高饱和 */
+/**
+ * ① 热光：柔光 → 硬光。影子从淡灰变成纯黑的形状并“落”到位，颜色饱和度同步拉满；
+ * 然后吸管从画面里取出四个颜色。
+ */
 export const LightScene: React.FC = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const hard = interpolate(frame, [7 * fps, 11 * fps], [0, 1], { ...clamp, easing: ease });
+  const hard = interpolate(frame, [0.6 * fps, 2.6 * fps], [0, 1], { ...clamp, easing: ease });
 
   return (
-    <SceneShell id="light">
-      <PhotoOrIllustration
-        photo={PHOTOS.light}
-        // 只对示意插画调色；真实原作保持原貌，不做任何色彩改动
-        style={PHOTOS.light.src ? undefined : {
-          filter: `saturate(${0.35 + hard * 1.0}) contrast(${0.8 + hard * 0.35}) brightness(${0.95 + hard * 0.1})`,
+    <KeywordFrame id="light" photo={PHOTOS.light}>
+      <Street
+        style={{ filter: `saturate(${0.45 + hard * 0.75}) contrast(${0.85 + hard * 0.25})`, scale: 1.04 - hard * 0.04 }}
+        layers={{
+          shadow: {
+            opacity: 0.2 + hard * 0.8,
+            translate: `${(1 - hard) * 60}px ${(1 - hard) * -30}px`,
+            filter: `blur(${(1 - hard) * 14}px)`,
+          },
         }}
-        layers={{ shadow: { opacity: 0.18 + hard * 0.82 } }}
       />
-      <AbsoluteFill
-        style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.55) 0%, transparent 35%)" }}
-      />
-      <KeywordTag index="关键词一" word="热光" en="HOT LIGHT" />
-      {/* 柔光 / 硬光 指示 */}
-      <div
-        style={{
-          position: "absolute",
-          right: 110,
-          top: 110,
-          display: "flex",
-          gap: 16,
-          fontFamily: FONT_SANS,
-          fontSize: 34,
-          fontWeight: 700,
-          color: INK,
-        }}
-      >
-        <span style={{ opacity: 1 - hard * 0.6 }}>柔光</span>
-        <span style={{ opacity: 0.6 }}>→</span>
-        <span style={{ opacity: 0.4 + hard * 0.6 }}>硬光</span>
-      </div>
-      {/* 色板 */}
-      <div
-        style={{
-          position: "absolute",
-          right: 110,
-          top: 200,
-          display: "flex",
-          flexDirection: "column",
-          gap: 18,
-        }}
-      >
-        {SWATCHES.map((s, i) => (
-          <div
-            key={s.name}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 16,
-              opacity: interpolate(frame, [(13 + i * 0.6) * fps, (13.5 + i * 0.6) * fps], [0, 1], clamp),
-              translate: interpolate(
-                frame,
-                [(13 + i * 0.6) * fps, (13.5 + i * 0.6) * fps],
-                ["40px 0px", "0px 0px"],
-                { ...clamp, easing: ease },
-              ),
-            }}
-          >
+      {PICKS.map((p, i) => {
+        const at = (3 + i * 0.45) * fps;
+        const t = interpolate(frame, [at, at + 12], [0, 1], { ...clamp, easing: ease });
+        return (
+          <React.Fragment key={p.name}>
             <div
               style={{
-                width: 84,
-                height: 84,
-                backgroundColor: s.color,
-                border: `3px solid ${INK}`,
-                borderRadius: 6,
+                position: "absolute",
+                left: `${p.x}%`,
+                top: `${p.y}%`,
+                width: 70,
+                height: 70,
+                marginLeft: -35,
+                marginTop: -35,
+                borderRadius: 35,
+                border: `5px solid ${INK}`,
+                background: p.color,
+                opacity: t,
+                scale: 0.4 + t * 0.6,
+                boxShadow: "0 6px 20px rgba(0,0,0,0.5)",
               }}
             />
-            <span style={{ fontFamily: FONT_SANS, fontSize: 36, fontWeight: 700, color: INK }}>{s.name}</span>
-          </div>
-        ))}
-      </div>
-    </SceneShell>
+            <div
+              style={{
+                position: "absolute",
+                right: 110,
+                top: 250 + i * 150,
+                display: "flex",
+                alignItems: "center",
+                gap: 20,
+                opacity: t,
+                translate: `${(1 - t) * 60}px 0px`,
+              }}
+            >
+              <span style={{ fontFamily: FONT_SANS, fontWeight: 700, fontSize: 36, color: INK, textShadow: "0 2px 12px rgba(0,0,0,0.7)" }}>
+                {p.name}
+              </span>
+              <div style={{ width: 110, height: 110, background: p.color, border: `4px solid ${INK}`, borderRadius: 8 }} />
+            </div>
+          </React.Fragment>
+        );
+      })}
+    </KeywordFrame>
   );
 };
