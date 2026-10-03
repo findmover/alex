@@ -1,0 +1,26 @@
+《等光》Alex Webb 艺术短片 —— 进度与待办（2026-10-03）
+
+【当前进度】
+- 资料：作者信息、书目、引语都已整理，未核实的标了 ⚠️（docs/01-资源收集.md）。35 张原作已核对来源并重新命名（docs/03-图片命名与来源.md）。05、25、26、32 号没用：05 是 Rebecca Norris Webb 的作品，其余三张作者待核实。
+- 创意：主题定为《等光》，动效风格“沉静”（Premium），节奏 72 BPM（1 拍 = 25 帧），全片 18 句文案、9 幕、约 82 秒。分镜、3D 空间设计、AIGC 提示词和卡点表都在 docs/04-创意方案-等光.md。
+- 视频：v5 已渲染，在 docs/review/wait-for-light-v5.mp4（1920×1080，无声）。
+  - 内容：灯箱印样与匹配剪辑、海地 1979 由黑白变彩色、影子浮起、三层景深、屏风折开、3D 画廊，全片叠胶片颗粒和尘埃。
+  - 用到的 skill：motion-art-direction、shot-composition、kinetic-typography、animation-principles、color-motion、beat-sync-editing、canvas-design，另有 Remotion 官方和 short-form-video。
+- 封面：竖版 3:4 和横版 16:9 两张（docs/review/Cover-*.png），设计理念见 docs/05-封面设计理念.md。
+
+【待完成】
+1. AIGC 素材（你来生成，提示词见 docs/04 第 5 节）：V1 南方小镇黑白空镜、V2 黑白翻书、V4 红墙上的棕榈影、M1 72 BPM 配乐。
+   放进 video/public/aigc/，在 video/src/data/aigc.ts 里把对应的 src 填上，再重新渲染。没放的素材会自动用程序生成的备用画面。
+2. 审片：每幕的文案、节奏、3D 效果，以及层次那一段手工切层的边缘精度。
+3. 事实核对：书名出自歌德《色彩论》的说法；“99% 都是失败”这句引语的原始出处。
+4. 版权：仓库 findmover/alex 是公开的，原作图片和成片都能被任何人下载。发布前请确认授权，或把仓库设为私有。
+5. 配乐与发布：在视频里加 m1-music.mp3，或者在剪映/抖音按卡点表配乐；然后选封面、发布。
+
+【本地运行】（需要 Node 18 以上）
+  git clone -b claude/determined-gauss-ften0r https://github.com/findmover/alex.git && cd alex/video
+  npm install
+  npm run dev                                                     # 打开 Remotion Studio 预览、逐帧调整
+  npx remotion render AlexWebb out/wait-for-light.mp4 --crf=18    # 渲染成片，约 15 分钟
+  npx remotion still Cover-Portrait out/cover.png                 # 导出封面（横版用 Cover-Landscape）
+  改了文案后先运行 npm run fonts 重新生成字体子集；换了原作图片后运行 python3 scripts/prepare-photos.py（需要 Pillow）。
+  本地渲染会自动下载 Chrome，不需要加 --browser-executable 参数，那是云端环境才用的。
